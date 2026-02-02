@@ -1,0 +1,84 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# =========================
+# Virtual Environments
+# =========================
+venv/
+ENV/
+env/
+.venv/
+.env.local
+.env.*.local
+
+# =========================
+# Environment Variables
+# =========================
+.env
+
+# =========================
+# IDE / Editor Settings
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# =========================
+# OS Generated Files
+# =========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+log/
+
+# =========================
+# Data Files (Optional - uncomment if needed)
+# =========================
+# *.xlsx
+# *.xls
+# *.csv
+
+# =========================
+# Misc
+# =========================
+*.bak
+*.tmp
+*.temp
+.cache/
