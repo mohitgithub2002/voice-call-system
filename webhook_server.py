@@ -57,9 +57,9 @@ def answer_call():
     due_date = _get_param('due_date', '')
     org_name = _get_param('org_name') or ORG_NAME
 
-    # Build Hindi TTS message (escape for XML so &, <, > don't break the response)
+    # Build Hindi TTS message with commas for natural pauses between sentences
     hindi_message = f"""
-नमस्ते {student_name} जी,
+नमस्ते {student_name} जी।
 यह {org_name} से बात हो रही है।
 आपकी {amount} रुपये की फीस बकाया है।
 कृपया {due_date} से पहले भुगतान करें।
@@ -67,10 +67,10 @@ def answer_call():
     """.strip()
     hindi_message_safe = xml.sax.saxutils.escape(hindi_message)
 
-    # Return Vobiz XML: must be valid XML. loop="0" = play once (no repeat)
+    # Return Vobiz XML: Speak once (loop=0), then Hangup to end the call
     xml_response = f'''<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-    <Speak language="hi-IN" voice="WOMAN" loop="0">
+    <Speak language="hi-IN" voice="WOMAN" >
         {hindi_message_safe}
     </Speak>
 </Response>'''

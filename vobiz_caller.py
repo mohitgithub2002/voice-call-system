@@ -143,7 +143,7 @@ class VobizCaller:
             
             if response.status_code == 200 or response.status_code == 201:
                 result = response.json()
-                
+                print(result)
                 return {
                     'status': 'initiated',
                     'call_uuid': result.get('call_uuid', 'unknown'),
