@@ -65,7 +65,15 @@ class VobizCaller:
         return phone
     
     def _build_answer_url(self, student: Dict) -> str:
-        """Build the answer URL with student parameters for TTS."""
+        """
+        Build the full answer_url including our query params for this student.
+
+        Vobiz docs: answer_url is "URL called when the call is answered. Must return valid XML."
+        We send this full URL (with query string) in the Make Call request. When the call
+        is answered, Vobiz performs an HTTP request to that exact URL—so the query params
+        are part of the URL we provided, not something Vobiz adds. Our server receives
+        them in the request (e.g. request.args in Flask).
+        """
         params = {
             'student_name': student['student_name'],
             'amount': student['pending_fees'],
@@ -73,6 +81,13 @@ class VobizCaller:
             'org_name': self.org_name
         }
         return f"{self.answer_url}?{urlencode(params)}"
+
+    def _build_hangup_url(self) -> str:
+        """Build hangup callback URL from answer_url base (same host, /hangup path)."""
+        base = self.answer_url.split('?')[0].rstrip('/')
+        if base.endswith('/answer'):
+            return base[:-7] + '/hangup'
+        return base + '/hangup' if base else '/hangup'
     
     def make_call(self, student: Dict, dry_run: bool = False) -> Dict:
         """
@@ -110,7 +125,8 @@ class VobizCaller:
                 'Content-Type': 'application/json'
             }
             
-            # JSON body
+            # JSON body (Vobiz Make Call API)
+            hangup_url = self._build_hangup_url()
             data = {
                 'from': self.caller_id,
                 'to': phone_number,
@@ -118,6 +134,8 @@ class VobizCaller:
                 'answer_method': 'POST',
                 'ring_timeout': '30',
                 'time_limit': '120',  # 2 minutes max
+                'hangup_url': hangup_url,
+                'hangup_method': 'POST',
             }
             
             # Make the API call
