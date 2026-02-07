@@ -92,9 +92,13 @@ class ExotelCaller:
         try:
             # Exotel API endpoint for connecting to a call flow (applet)
             url = f"{self.base_url}/Calls/connect.json"
+
+            student_name = str(student['student_name']).replace(" ", "%20") 
+            amount = str(student['pending_fees']).replace(" ", "%20")
+            due_date = str(student['due_date']).replace(" ", "%20")
             
             # Build the applet URL
-            applet_url = f"http://my.exotel.com/{self.account_sid}/exoml/start_voice/{self.app_id}?STUDENT_NAME={student['student_name']}&AMOUNT={student['pending_fees']}&DATE={student['due_date']}"
+            applet_url = f"http://my.exotel.com/{self.account_sid}/exoml/start_voice/{self.app_id}"
             
             # POST data
             data = {
@@ -104,6 +108,8 @@ class ExotelCaller:
                 'CallType': 'trans',  # Transactional call
                 'TimeLimit': 120,     # 2 minutes max
                 'TimeOut': 30,        # Ring for 30 seconds
+                'CustomField': student_name,
+                
             }
             
             # Make the API call

@@ -97,6 +97,89 @@ def hangup_callback():
     return {'status': 'received'}
 
 
+@app.route('/exotel/answer', methods=['GET', 'HEAD'])
+def exotel_answer():
+    """
+    Handle Exotel dynamic greeting callback.
+    
+    Exotel makes a GET request with these query parameters:
+        - CallSid: unique identifier of the call
+        - From: the calling party number
+        - To: the Exotel company number being called
+        - DialWhomNumber: the number being dialed (may be empty)
+        - CustomField: custom data (not used - we lookup from CSV)
+    
+    Looks up student data from sample_students.csv based on the From number.
+    
+    Returns:
+        Plain text message to be read out via Exotel's TTS engine.
+        Content-Type MUST be 'text/plain'.
+    """
+    import csv
+    
+    # For HEAD requests, just return headers without body
+    if request.method == 'HEAD':
+        response = Response('', mimetype='text/plain')
+        return response
+    
+    # Get Exotel query parameters
+    call_sid = request.args.get('CallSid', '')
+    from_number = request.args.get('From', '')
+    to_number = request.args.get('To', '')
+    dial_whom = request.args.get('DialWhomNumber', '')
+    
+    # Log the incoming request
+    print(f"Exotel Answer Request: CallSid={call_sid}, From={from_number}, To={to_number}")
+    
+    # Normalize phone number - extract last 10 digits
+    def normalize_phone(phone: str) -> str:
+        """Extract last 10 digits from phone number."""
+        digits = ''.join(filter(str.isdigit, str(phone)))
+        return digits[-10:] if len(digits) >= 10 else digits
+    
+    normalized_from = normalize_phone(from_number)
+    
+    # Default values
+    student_name = 'Student'
+    amount = '0'
+    due_date = ''
+    org_name = ORG_NAME
+    student_found = False
+    
+    # Look up student in CSV file
+    csv_path = os.path.join(os.path.dirname(__file__), 'sample_students.csv')
+    try:
+        with open(csv_path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                csv_phone = normalize_phone(row.get('phone_number', ''))
+                if csv_phone == normalized_from:
+                    student_name = row.get('student_name', student_name)
+                    amount = row.get('pending_fees', amount)
+                    due_date = row.get('due_date', due_date)
+                    student_found = True
+                    print(f"Found student: {student_name}, Amount: {amount}, Due: {due_date}")
+                    break
+    except FileNotFoundError:
+        print(f"CSV file not found: {csv_path}")
+    except Exception as e:
+        print(f"Error reading CSV: {e}")
+    
+    if not student_found:
+        print(f"No student found for phone: {from_number} (normalized: {normalized_from})")
+    
+    # Build Hindi TTS message
+    hindi_message = f"""नमस्ते {student_name} जी।
+यह {org_name} से बात हो रही है।
+आपकी {amount} रुपये की फीस बकाया है।
+कृपया {due_date} से पहले भुगतान करें।
+धन्यवाद।"""
+    
+    # Return plain text response as required by Exotel
+    response = Response(hindi_message, mimetype='text/plain')
+    return response
+
+
 @app.route('/api/call', methods=['POST'])
 def make_call():
     """
