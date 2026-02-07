@@ -119,7 +119,8 @@ def exotel_answer():
     
     # For HEAD requests, just return headers without body
     if request.method == 'HEAD':
-        response = Response('', mimetype='text/plain')
+        response = Response('', content_type='text/plain')
+        response.headers['Content-Type'] = 'text/plain'
         return response
     
     # Get Exotel query parameters
@@ -181,7 +182,8 @@ def exotel_answer():
 </speak>"""
     
     # Return plain text response as required by Exotel
-    response = Response(ssml_response, mimetype='text/plain')
+    response = Response(ssml_response, content_type='text/plain')
+    response.headers['Content-Type'] = 'text/plain'
     return response
 
 
