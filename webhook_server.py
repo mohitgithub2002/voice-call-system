@@ -168,15 +168,20 @@ def exotel_answer():
     if not student_found:
         print(f"No student found for phone: {from_number} (normalized: {normalized_from})")
     
-    # Build Hindi TTS message
-    hindi_message = f"""नमस्ते {student_name} जी।
-यह {org_name} से बात हो रही है।
-आपकी {amount} रुपये की फीस बकाया है।
-कृपया {due_date} से पहले भुगतान करें।
-धन्यवाद।"""
+    # Build Hindi TTS message with SSML format
+    hindi_text = f"""नमस्ते। यह {org_name} की फीस रिमाइंडर कॉल है।
+    {student_name}, की ₹{amount} फीस बकाया है।
+    अंतिम तिथि {due_date} है। कृपया जल्द भुगतान करें। धन्यवाद।"""
+    
+    # Wrap in SSML speak and voice tags
+    ssml_response = f"""<speak>
+  <voice language="hi-IN">
+    {hindi_text}
+  </voice>
+</speak>"""
     
     # Return plain text response as required by Exotel
-    response = Response(hindi_message, mimetype='text/plain')
+    response = Response(ssml_response, mimetype='text/plain')
     return response
 
 
